@@ -1,6 +1,7 @@
 import { Application, Spritesheet, Text } from "pixi.js";
 import { LotteryBalls } from "./lottery-balls";
 import { LotterySelection } from "./lottery-selection";
+import { LotteryUI } from "./lottery-ui";
 
 export class LotteryGame {
     public app?: Application;
@@ -8,6 +9,7 @@ export class LotteryGame {
 
     private lotteryBalls?: LotteryBalls;
     private lotterySelection?: LotterySelection;
+    private lotteryUI?: LotteryUI;
 
     private delta: number = 0;
     private lastUpdateTime?: number;
@@ -21,13 +23,15 @@ export class LotteryGame {
             backgroundAlpha: 0
         });
 
-        this.lotteryBalls = new LotteryBalls(this.app, 10, 1000);
+        this.lotteryBalls = new LotteryBalls(this.app);
         this.lotteryBalls.onSelectionChange.connect((balls) => this.onBallSelectionChange(balls));
 
-        this.lotterySelection = new LotterySelection(this.app, 700);
+        this.lotterySelection = new LotterySelection(this.app);
         this.lotterySelection.setLabel([]);
 
-        (window as any).testLuckyDip = () => this.lotteryBalls?.selectLuckyDip();
+        this.lotteryUI = new LotteryUI(this.app);
+        this.lotteryUI.onLuckyDip.connect(() => this.lotteryBalls?.selectLuckyDip());
+        this.lotteryUI.onClear.connect(() => this.lotteryBalls?.clearSelection());
 
         this.render(0);
     }

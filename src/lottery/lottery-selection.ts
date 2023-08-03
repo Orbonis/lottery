@@ -5,10 +5,10 @@ export class LotterySelection {
     private frame: Graphics;
     private labels: Text[];
 
-    constructor(app: Application, y: number) {
+    constructor(app: Application) {
         this.parent = new Container();
         this.parent.x = app.view.width / 2;
-        this.parent.y = y;
+        this.parent.y = 700;
         app.stage.addChild(this.parent);
 
         this.frame = new Graphics();

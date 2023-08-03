@@ -13,6 +13,8 @@ interface Ball {
 
 export class LotteryBalls {
     private readonly ballCount: number = 59;
+    private readonly parentWidth: number = 1000;
+    private readonly columns: number = 10;
 
     public onSelectionChange: Signal<(balls: number[]) => void> = new Signal();
 
@@ -23,21 +25,21 @@ export class LotteryBalls {
 
     private ballWidth: number = 0;
 
-    constructor(app: Application, columns: number, parentWidth: number) {
+    constructor(app: Application) {
         this.app = app;
 
         this.parent = new Container();
-        this.parent.x = (this.app.view.width / 2) - (parentWidth / 2);
+        this.parent.x = (this.app.view.width / 2) - (this.parentWidth / 2);
         this.parent.y = 10;
         this.app.stage.addChild(this.parent);
 
-        this.ballWidth = Math.floor(parentWidth / columns);
+        this.ballWidth = Math.floor(this.parentWidth / this.columns);
 
         this.balls = [];
         for (let i = 0; i < this.ballCount; i++) {
             const container = new Container();
-            container.x = this.ballWidth * (i % columns);
-            container.y = Math.floor(i / columns) * this.ballWidth;
+            container.x = this.ballWidth * (i % this.columns);
+            container.y = Math.floor(i / this.columns) * this.ballWidth;
             container.interactive = true;
             container.hitArea = new Circle(this.ballWidth / 2, this.ballWidth / 2, (this.ballWidth / 2) - 10,);
             container.cursor = "pointer";
@@ -74,6 +76,16 @@ export class LotteryBalls {
         for (let i = 0; i < this.balls.length; i++) {
             this.updateBall(i);
         }
+
+        this.updateInteractiveState();
+        this.onSelectionChange.emit(this.getSelected());
+    }
+
+    public clearSelection(): void {
+        this.balls.forEach((x, i) => {
+            x.selected = false;
+            this.updateBall(i)
+        });
 
         this.updateInteractiveState();
         this.onSelectionChange.emit(this.getSelected());

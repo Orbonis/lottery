@@ -1,1 +1,1 @@
-# lottery
+# Lottery Technical Test

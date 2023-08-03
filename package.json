@@ -1,0 +1,45 @@
+{
+  "name": "lottery-tech-test",
+  "version": "0.0.1",
+  "description": "Technical test for Live 5 interview process",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "webpack serve --config ./webpack.config.js",
+    "build": "webpack --config ./webpack.config.js --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Orbonis/lottery.git"
+  },
+  "author": "Dean Rutter",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Orbonis/lottery/issues"
+  },
+  "homepage": "https://github.com/Orbonis/lottery#readme",
+  "devDependencies": {
+    "@types/mersenne-twister": "^1.1.3",
+    "@types/react": "^18.2.18",
+    "@types/react-dom": "^18.2.7",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.3",
+    "sass": "^1.64.2",
+    "sass-loader": "^13.3.2",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "mersenne-twister": "^1.1.0",
+    "pixi.js": "^7.2.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typed-signals": "^2.5.0"
+  }
+}

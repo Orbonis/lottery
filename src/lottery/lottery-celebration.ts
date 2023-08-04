@@ -16,7 +16,7 @@ export class LotteryCelebration {
         this.winLabel = new Text("", { fill: 0xFFFFFF, fontFamily: "Helvetica", align: "center", fontSize: 35});
         this.winLabel.anchor.set(0.5);
         this.winLabel.x = 0;
-        this.winLabel.y = -20;
+        this.winLabel.y = -25;
         this.parent.addChild(this.winLabel);
 
         this.balls = [];

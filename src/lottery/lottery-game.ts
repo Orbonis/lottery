@@ -4,6 +4,7 @@ import { LotterySelectionUI } from "./lottery-selection-ui";
 import { LotteryControlUI } from "./lottery-control-ui";
 import { LotteryCelebration } from "./lottery-celebration";
 import { LotterCreditsUI } from "./lottery-credits-ui";
+import { LotteryForces } from "./lottery-forces";
 
 export class LotteryGame {
     public static readonly keepPreviousSelection: boolean = true;
@@ -18,6 +19,8 @@ export class LotteryGame {
     private lotterySelectionUI?: LotterySelectionUI;
     private lotteryControlUI?: LotteryControlUI;
     private lotteryCelebration?: LotteryCelebration;
+
+    private lotteryForces?: LotteryForces;
 
     private delta: number = 0;
     private lastUpdateTime?: number;
@@ -56,6 +59,10 @@ export class LotteryGame {
 
         this.lotteryCelebration = new LotteryCelebration(this.app);
 
+        if (process.env.NODE_ENV === "development") {
+            this.lotteryForces = new LotteryForces();
+        }
+
         this.render(0);
     }
 
@@ -79,8 +86,14 @@ export class LotteryGame {
     }
 
     private async playGame(): Promise<void> {
-        const winningBalls: number[] | undefined = this.lotteryBalls?.chooseRandomBalls();
+        let winningBalls: number[] | undefined = this.lotteryBalls?.chooseRandomBalls();
         if (winningBalls) {
+            if (process.env.NODE_ENV === "development") {
+                if (LotteryForces.winningBalls) {
+                    winningBalls = LotteryForces.winningBalls;
+                    LotteryForces.winningBalls = undefined;
+                }
+            }
             if (this.currentSelectedBalls.length === LotteryBalls.maxSelection) {
                 this.lotteryControlUI?.setStartState(false);
                 this.lotteryControlUI?.setClearState(false);

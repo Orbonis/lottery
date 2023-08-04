@@ -10,6 +10,12 @@ export class LotteryGame {
     public static readonly keepPreviousSelection: boolean = true;
     public static readonly startingCredits: number = 0;
     public static readonly costPerPlay: number = 0;
+    public static readonly winConfiguration: { [ key: number]: number } = {
+        3: 50,
+        4: 100,
+        5: 200,
+        6: 500
+    };
 
     public app?: Application;
     public sheet?: Spritesheet;
@@ -61,6 +67,7 @@ export class LotteryGame {
 
         if (process.env.NODE_ENV === "development") {
             this.lotteryForces = new LotteryForces();
+            this.lotteryForces.setupForces();
         }
 
         this.render(0);
@@ -83,31 +90,56 @@ export class LotteryGame {
         this.lotteryControlUI?.setClearState(balls.length > 0);
         this.lotteryControlUI?.setLuckyDipState(balls.length === 0);
         this.lotteryControlUI?.setStartState(balls.length === LotteryBalls.maxSelection);
+
+        if (process.env.NODE_ENV === "development") {
+            this.lotteryForces?.setCurrentSelection(this.currentSelectedBalls);
+        }
     }
 
     private async playGame(): Promise<void> {
-        let winningBalls: number[] | undefined = this.lotteryBalls?.chooseRandomBalls();
-        if (winningBalls) {
-            if (process.env.NODE_ENV === "development") {
-                if (LotteryForces.winningBalls) {
-                    winningBalls = LotteryForces.winningBalls;
-                    LotteryForces.winningBalls = undefined;
+        if (this.currentCredits >= LotteryGame.costPerPlay) {
+            this.currentCredits -= LotteryGame.costPerPlay;
+            this.lotteryCreditsUI?.updateCreditsLabel(this.currentCredits);
+
+            let winningBalls: number[] | undefined = this.lotteryBalls?.chooseRandomBalls();
+            if (winningBalls) {
+                if (process.env.NODE_ENV === "development") {
+                    if (LotteryForces.winningBalls) {
+                        winningBalls = LotteryForces.winningBalls;
+                        LotteryForces.winningBalls = undefined;
+                    }
                 }
-            }
-            if (this.currentSelectedBalls.length === LotteryBalls.maxSelection) {
-                this.lotteryControlUI?.setStartState(false);
-                this.lotteryControlUI?.setClearState(false);
-                this.lotteryControlUI?.setLuckyDipState(false);
+                if (this.currentSelectedBalls.length === LotteryBalls.maxSelection) {
+                    this.lotteryControlUI?.setStartState(false);
+                    this.lotteryControlUI?.setClearState(false);
+                    this.lotteryControlUI?.setLuckyDipState(false);
+    
+                    this.lotteryBalls?.disableInteraction();
 
-                this.lotteryBalls?.disableInteraction();
-
-                await this.lotteryCelebration?.showWin(this.currentSelectedBalls, winningBalls);
-
-                this.lotteryControlUI?.setResetState(true);
+                    const matchingBalls: number[] = winningBalls.filter((x) => this.currentSelectedBalls.indexOf(x) !== -1);
+                    const prize: number = LotteryGame.winConfiguration[matchingBalls.length] ?? 0;
+    
+                    await this.lotteryCelebration?.showWin(
+                        this.currentSelectedBalls, 
+                        winningBalls, 
+                        prize,
+                        matchingBalls,
+                        () => this.awardWin(prize)
+                    );
+    
+                    this.lotteryControlUI?.setResetState(true);
+                }
+            } else {
+                console.error("Something went wrong. LotteryBalls was not initialised.");
             }
         } else {
-            console.error("Something went wrong. LotteryBalls was not initialised.");
+            console.error("Not enough credits available. Unhandled condition.");
         }
+    }
+
+    private awardWin(prize: number): void {
+        this.currentCredits += prize;
+        this.lotteryCreditsUI?.updateCreditsLabel(this.currentCredits);
     }
 
     private resetGame(): void {

@@ -1,26 +1,23 @@
 import { Application, Container, Graphics, Text } from "pixi.js";
 import { Ball, LotteryBalls } from "./lottery-balls";
 
-interface WinConfigurationData {
-    [ key: number ]: number;
-}
-
 export class LotteryCelebration {
-    public static readonly winConfiguration: WinConfigurationData = {
-        3: 50,
-        4: 100,
-        5: 200,
-        6: 500
-    };
 
     private parent: Container;
     private balls: Ball[];
+    private winLabel: Text;
     
     constructor(app: Application) {
         this.parent = new Container();
         this.parent.x = app.view.width / 2;
         this.parent.y = 950;
         app.stage.addChild(this.parent);
+
+        this.winLabel = new Text("", { fill: 0xFFFFFF, fontFamily: "Helvetica", align: "center", fontSize: 35});
+        this.winLabel.anchor.set(0.5);
+        this.winLabel.x = 0;
+        this.winLabel.y = -20;
+        this.parent.addChild(this.winLabel);
 
         this.balls = [];
         for (let i = 0; i < LotteryBalls.maxSelection; i++) {
@@ -38,7 +35,7 @@ export class LotteryCelebration {
             circle.endFill();
             container.addChild(circle);
 
-            const label = new Text("00", { fill: 0xFFFFFF, fontFamily: "Helvetica", align: "center", fontSize: 40});
+            const label = new Text("", { fill: 0xFFFFFF, fontFamily: "Helvetica", align: "center", fontSize: 40});
             label.anchor.set(0.5);
             label.x = 50;
             label.y = 50;
@@ -48,7 +45,7 @@ export class LotteryCelebration {
         }
     }
 
-    public showWin(selected: number[], winning: number[]): Promise<void> {
+    public showWin(selected: number[], winning: number[], winAmount: number, matchingBalls: number[], updateCredits: () => void): Promise<void> {
         return new Promise((resolve) => {
             for (let i = 0; i < winning.length; i++) {
                 this.balls[i].value = winning[i];
@@ -58,7 +55,14 @@ export class LotteryCelebration {
                 const winningBall: boolean = selected.indexOf(winning[i]) !== -1;
                 this.balls[i].circle.tint = (winningBall) ? "green" : "red";
                 this.balls[i].label.tint = (winningBall) ? "green" : "red";
+
+                if (winAmount > 0) {
+                    this.winLabel.text = `You won ${winAmount} credits!`;
+                } else {
+                    this.winLabel.text = "Better luck next time!";
+                }
             }
+            updateCredits();
             resolve();
         });
     }
@@ -67,6 +71,7 @@ export class LotteryCelebration {
         this.balls.forEach((x) => {
             x.container.visible = false;
             x.value = 0;
-        })
+        });
+        this.winLabel.text = "";
     }
 }

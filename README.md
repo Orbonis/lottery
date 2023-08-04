@@ -7,7 +7,7 @@ npm start
 ```
 
 The start command will start the game using the webpack dev server.
-You can also build with the following command:  
+You can also run a production build with the following command:  
 `npm run build`
 
 ### Release Version

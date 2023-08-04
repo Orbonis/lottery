@@ -22,7 +22,7 @@ const data = {
         modules: [
             path.resolve(__dirname, 'node_modules'),
             path.resolve(__dirname, compilerOptions.baseUrl),
-        ],
+        ]
     },
     module: {
         rules: [

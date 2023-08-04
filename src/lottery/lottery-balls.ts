@@ -9,6 +9,7 @@ export interface Ball {
     label: Text;
     selected: boolean;
     highlighted: boolean;
+    position: { x: number, y: number }
 }
 
 export class LotteryBalls {
@@ -60,7 +61,15 @@ export class LotteryBalls {
             label.y = this.ballWidth / 2;
             container.addChild(label);
 
-            this.balls.push({ container, circle, label, selected: false, highlighted: false, value: (i < LotteryBalls.ballCount) ? i + 1 : -1 });
+            this.balls.push({
+                container, 
+                circle, 
+                label, 
+                selected: false, 
+                highlighted: false, 
+                value: (i < LotteryBalls.ballCount) ? i + 1 : -1,
+                position: { x: container.x, y: container.y }
+            });
             this.updateBall(i);
         }
     }

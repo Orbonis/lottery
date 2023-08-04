@@ -1,10 +1,11 @@
-import { Application, Spritesheet, Text } from "pixi.js";
+import { Application } from "pixi.js";
 import { LotteryBalls } from "./lottery-balls";
 import { LotterySelectionUI } from "./lottery-selection-ui";
 import { LotteryControlUI } from "./lottery-control-ui";
 import { LotteryCelebration } from "./lottery-celebration";
 import { LotterCreditsUI } from "./lottery-credits-ui";
 import { LotteryForces } from "./lottery-forces";
+import { LotteryCelebrationAnimated } from "./celebration/lottery-celebration-animated";
 
 export class LotteryGame {
     public static readonly keepPreviousSelection: boolean = true;
@@ -17,8 +18,7 @@ export class LotteryGame {
         6: 500
     };
 
-    public app?: Application;
-    public sheet?: Spritesheet;
+    private app?: Application;
 
     private lotteryCreditsUI?: LotterCreditsUI;
     private lotteryBalls?: LotteryBalls;
@@ -40,7 +40,7 @@ export class LotteryGame {
             autoStart: false,
             width: 1600,
             height: 1200,
-            backgroundAlpha: 0
+            backgroundColor: 0x222222
         });
 
         this.currentCredits = LotteryGame.startingCredits;
@@ -63,7 +63,7 @@ export class LotteryGame {
         this.lotteryControlUI.setStartState(false);
         this.lotteryControlUI.setResetState(false);
 
-        this.lotteryCelebration = new LotteryCelebration(this.app);
+        this.lotteryCelebration = new LotteryCelebrationAnimated(this.app);
 
         if (process.env.NODE_ENV === "development") {
             this.lotteryForces = new LotteryForces();
@@ -120,6 +120,7 @@ export class LotteryGame {
                     const prize: number = LotteryGame.winConfiguration[matchingBalls.length] ?? 0;
     
                     await this.lotteryCelebration?.showWin(
+                        this.app!,
                         this.currentSelectedBalls, 
                         winningBalls, 
                         prize,

@@ -85,7 +85,7 @@ export class LotteryBalls {
     }
 
     public chooseRandomBalls(): number[] {
-        const pool: number[] = new Array(LotteryBalls.ballCount).fill(0).map((x, i) => i);
+        const pool: number[] = new Array(LotteryBalls.ballCount).fill(0).map((x, i) => i + 1);
         const balls: number[] = [];
 
         for (let i = 0; i < LotteryBalls.maxSelection; i++) {

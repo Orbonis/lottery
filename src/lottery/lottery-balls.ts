@@ -2,7 +2,7 @@ import { Application, Circle, Container, Graphics, Text, TextStyle } from "pixi.
 import { RNG } from "src/utils/rng";
 import { Signal } from "typed-signals";
 
-interface Ball {
+export interface Ball {
     container: Container;
     value: number;
     circle: Graphics;
@@ -12,9 +12,10 @@ interface Ball {
 }
 
 export class LotteryBalls {
-    private readonly ballCount: number = 59;
-    private readonly parentWidth: number = 1000;
-    private readonly columns: number = 10;
+    public static readonly ballCount: number = 59;
+    public static readonly parentWidth: number = 1000;
+    public static readonly columns: number = 10;
+    public static readonly maxSelection: number = 6;
 
     public onSelectionChange: Signal<(balls: number[]) => void> = new Signal();
 
@@ -29,18 +30,18 @@ export class LotteryBalls {
         this.app = app;
 
         this.parent = new Container();
-        this.parent.x = (this.app.view.width / 2) - (this.parentWidth / 2);
+        this.parent.x = (this.app.view.width / 2) - (LotteryBalls.parentWidth / 2);
         this.parent.y = 10;
         this.app.stage.addChild(this.parent);
 
-        this.ballWidth = Math.floor(this.parentWidth / this.columns);
+        this.ballWidth = Math.floor(LotteryBalls.parentWidth / LotteryBalls.columns);
 
         this.balls = [];
-        for (let i = 0; i < this.ballCount; i++) {
+        for (let i = 0; i < LotteryBalls.ballCount + 1; i++) {
             const container = new Container();
-            container.x = this.ballWidth * (i % this.columns);
-            container.y = Math.floor(i / this.columns) * this.ballWidth;
-            container.interactive = true;
+            container.x = this.ballWidth * (i % LotteryBalls.columns);
+            container.y = Math.floor(i / LotteryBalls.columns) * this.ballWidth;
+            container.eventMode = "static";
             container.hitArea = new Circle(this.ballWidth / 2, this.ballWidth / 2, (this.ballWidth / 2) - 10,);
             container.cursor = "pointer";
             container.on("pointerover", () => this.onPointerOver(i));
@@ -51,22 +52,23 @@ export class LotteryBalls {
             const circle = new Graphics();
             container.addChild(circle);
 
-            const label = new Text((i + 1).toString(), this.getLabelStyle(0xEEEEEE));
+            const labelText: string = (i < LotteryBalls.ballCount) ? (i + 1).toString() : "LD";
+            const label = new Text(labelText, this.getLabelStyle(0xEEEEEE));
             label.anchor.set(0.5);
             label.x = this.ballWidth / 2;
             label.y = this.ballWidth / 2;
             container.addChild(label);
 
-            this.balls.push({ container, circle, label, selected: false, highlighted: false, value: i + 1 });
+            this.balls.push({ container, circle, label, selected: false, highlighted: false, value: (i < LotteryBalls.ballCount) ? i + 1 : -1 });
             this.updateBall(i);
         }
     }
 
     public selectLuckyDip(): void {
-        const pool: number[] = new Array(this.ballCount).fill(0).map((x, i) => i);
+        const pool: number[] = new Array(LotteryBalls.ballCount).fill(0).map((x, i) => i);
         this.balls.forEach((x) => x.selected = false);
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < LotteryBalls.maxSelection; i++) {
             const random = RNG.getRandomInt(pool.length);
             const value = pool[random];
             pool.splice(random, 1);
@@ -78,7 +80,19 @@ export class LotteryBalls {
         }
 
         this.updateInteractiveState();
-        this.onSelectionChange.emit(this.getSelected());
+        this.onSelectionChange.emit(this.getCurrentSelected());
+    }
+
+    public chooseRandomBalls(): number[] {
+        const pool: number[] = new Array(LotteryBalls.ballCount).fill(0).map((x, i) => i);
+        const balls: number[] = [];
+
+        for (let i = 0; i < LotteryBalls.maxSelection; i++) {
+            const random = RNG.getRandomInt(pool.length);
+            balls.push(...pool.splice(random, 1));
+        }
+
+        return balls;
     }
 
     public clearSelection(): void {
@@ -88,7 +102,16 @@ export class LotteryBalls {
         });
 
         this.updateInteractiveState();
-        this.onSelectionChange.emit(this.getSelected());
+        this.onSelectionChange.emit(this.getCurrentSelected());
+    }
+
+    public enableInteraction(): void {
+        this.updateInteractiveState();
+        this.onSelectionChange.emit(this.getCurrentSelected());
+    }
+
+    public disableInteraction(): void {
+        this.balls.forEach((x) => x.container.eventMode = "none");
     }
 
     private onPointerOver(index: number): void {
@@ -102,11 +125,16 @@ export class LotteryBalls {
     }
 
     private onPointerUp(index: number): void {
+        if (index === LotteryBalls.ballCount) {
+            // LD ball
+            const pool: number[] = this.balls.filter((x) => !x.selected && x.value !== -1).map((x) => x.value - 1);
+            index = pool[RNG.getRandomInt(pool.length)];
+        }
         this.balls[index].selected = !this.balls[index].selected;
         this.updateBall(index);
 
         this.updateInteractiveState();
-        this.onSelectionChange.emit(this.getSelected());
+        this.onSelectionChange.emit(this.getCurrentSelected());
     }
 
     private updateBall(index: number): void {
@@ -122,19 +150,23 @@ export class LotteryBalls {
     }
 
     private updateInteractiveState(): void {
-        const selectedBalls = this.getSelected();
-        if (selectedBalls.length >= 6) {
-            this.balls.forEach((x) => x.container.interactive = x.selected);
+        const selectedBalls = this.getCurrentSelected();
+        if (selectedBalls.length >= LotteryBalls.maxSelection) {
+            this.balls.forEach((x, i) => {
+                x.container.eventMode = (x.selected) ? "static": "none";
+                x.highlighted = false;
+                this.updateBall(i);
+            });
         } else {
-            this.balls.forEach((x) => x.container.interactive = true);
+            this.balls.forEach((x) => x.container.eventMode = "static");
         }
-    }
-
-    private getSelected(): number[] {
-        return this.balls.filter((x) => x.selected).map((x) => x.value);
     }
 
     private getLabelStyle(colour: number): Partial<TextStyle> {
         return { fill: colour, fontFamily: "Helvetica", align: "center", fontSize: this.ballWidth / 3 };
+    }
+
+    private getCurrentSelected(): number[] {
+        return this.balls.filter((x) => x.selected).map((x) => x.value);
     }
 }

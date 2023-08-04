@@ -1,6 +1,7 @@
 import { Application, Container, Graphics, Text, TextStyle } from "pixi.js";
+import { LotteryBalls } from "./lottery-balls";
 
-export class LotterySelection {
+export class LotterySelectionUI {
     private parent: Container;
     private frame: Graphics;
     private labels: Text[];
@@ -11,16 +12,17 @@ export class LotterySelection {
         this.parent.y = 700;
         app.stage.addChild(this.parent);
 
+        const frameWidth: number = (LotteryBalls.maxSelection * 80) + 20;
         this.frame = new Graphics();
         this.frame.lineStyle({ width: 4, color: 0xFFFFFF });
-        this.frame.drawRoundedRect(-275, -45, 550, 90, 20);
+        this.frame.drawRoundedRect(-(frameWidth / 2), -45, frameWidth, 90, 20);
         this.parent.addChild(this.frame);
 
         this.labels = [];
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < LotteryBalls.maxSelection; i++) {
             const label = new Text("", this.getTextStyle(0xEEEEEE));
             label.anchor.set(0.5);
-            label.x = (i * 80) - 200;
+            label.x = (i * 80) - ((LotteryBalls.maxSelection / 2) * 80) + 40;
             this.labels.push(label);
             this.parent.addChild(label);
         }

@@ -6,18 +6,9 @@ import { LotteryCelebration } from "./lottery-celebration";
 import { LotterCreditsUI } from "./lottery-credits-ui";
 import { LotteryForces } from "./lottery-forces";
 import { LotteryCelebrationAnimated } from "./celebration/lottery-celebration-animated";
+import { config as Config } from "./lottery-config";
 
 export class LotteryGame {
-    public static readonly keepPreviousSelection: boolean = true;
-    public static readonly startingCredits: number = 0;
-    public static readonly costPerPlay: number = 0;
-    public static readonly winConfiguration: { [ key: number]: number } = {
-        3: 50,
-        4: 100,
-        5: 200,
-        6: 500
-    };
-
     private app?: Application;
 
     private lotteryCreditsUI?: LotterCreditsUI;
@@ -43,7 +34,7 @@ export class LotteryGame {
             backgroundColor: 0x222222
         });
 
-        this.currentCredits = LotteryGame.startingCredits;
+        this.currentCredits = Config.startingCredits;
 
         this.lotteryCreditsUI = new LotterCreditsUI(this.app);
         this.lotteryCreditsUI.updateCreditsLabel(this.currentCredits);
@@ -89,7 +80,7 @@ export class LotteryGame {
         this.lotterySelectionUI?.setLabel(balls);
         this.lotteryControlUI?.setClearState(balls.length > 0);
         this.lotteryControlUI?.setLuckyDipState(balls.length === 0);
-        this.lotteryControlUI?.setStartState(balls.length === LotteryBalls.maxSelection);
+        this.lotteryControlUI?.setStartState(balls.length === Config.maxSelection);
 
         if (process.env.NODE_ENV === "development") {
             this.lotteryForces?.setCurrentSelection(this.currentSelectedBalls);
@@ -97,8 +88,8 @@ export class LotteryGame {
     }
 
     private async playGame(): Promise<void> {
-        if (this.currentCredits >= LotteryGame.costPerPlay) {
-            this.currentCredits -= LotteryGame.costPerPlay;
+        if (this.currentCredits >= Config.costPerPlay) {
+            this.currentCredits -= Config.costPerPlay;
             this.lotteryCreditsUI?.updateCreditsLabel(this.currentCredits);
 
             let winningBalls: number[] | undefined = this.lotteryBalls?.chooseRandomBalls();
@@ -109,7 +100,7 @@ export class LotteryGame {
                         LotteryForces.winningBalls = undefined;
                     }
                 }
-                if (this.currentSelectedBalls.length === LotteryBalls.maxSelection) {
+                if (this.currentSelectedBalls.length === Config.maxSelection) {
                     this.lotteryControlUI?.setStartState(false);
                     this.lotteryControlUI?.setClearState(false);
                     this.lotteryControlUI?.setLuckyDipState(false);
@@ -117,7 +108,7 @@ export class LotteryGame {
                     this.lotteryBalls?.disableInteraction();
 
                     const matchingBalls: number[] = winningBalls.filter((x) => this.currentSelectedBalls.indexOf(x) !== -1);
-                    const prize: number = LotteryGame.winConfiguration[matchingBalls.length] ?? 0;
+                    const prize: number = Config.winConfiguration[matchingBalls.length] ?? 0;
     
                     await this.lotteryCelebration?.showWin(
                         this.app!,
@@ -144,7 +135,7 @@ export class LotteryGame {
     }
 
     private resetGame(): void {
-        if (LotteryGame.keepPreviousSelection) {
+        if (Config.keepPreviousSelection) {
             this.lotteryBalls?.enableInteraction();
         } else {
             this.lotteryBalls?.clearSelection();

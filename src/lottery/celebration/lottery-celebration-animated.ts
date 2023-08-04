@@ -1,8 +1,8 @@
 import { Easing, ease } from "pixi-ease";
 import { LotteryCelebration } from "../lottery-celebration";
 import { RNG } from "src/utils/rng";
-import { LotteryBalls } from "../lottery-balls";
-import { Application, Assets, Container, Texture } from "pixi.js";
+import { config as Config } from "../lottery-config";
+import { Application, Assets, Texture } from "pixi.js";
 
 export class LotteryCelebrationAnimated extends LotteryCelebration {
     private particleTexture?: Texture;
@@ -24,7 +24,7 @@ export class LotteryCelebrationAnimated extends LotteryCelebration {
             this.balls[i].container.y -= 100;
             const anim = ease.add(this.balls[i].container, { alpha: 1, y: this.balls[i].position.y }, { duration: 500, ease: "easeOutQuad" });
             anim.on("each", () => {
-                const randomValue: number = RNG.getRandomInt(LotteryBalls.ballCount);
+                const randomValue: number = RNG.getRandomInt(Config.ballCount);
                 this.balls[i].label.text = ((randomValue < 10) ? "0" : "") + randomValue.toString();
             });
             await this.waitForAnimation(anim);

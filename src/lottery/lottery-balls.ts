@@ -1,6 +1,7 @@
 import { Application, Circle, Container, Graphics, Text, TextStyle } from "pixi.js";
 import { RNG } from "src/utils/rng";
 import { Signal } from "typed-signals";
+import { config as Config } from "./lottery-config";
 
 export interface Ball {
     container: Container;
@@ -13,11 +14,7 @@ export interface Ball {
 }
 
 export class LotteryBalls {
-    public static readonly ballCount: number = 59;
-    public static readonly parentWidth: number = 1000;
-    public static readonly columns: number = 10;
-    public static readonly maxSelection: number = 6;
-    public static readonly showLuckyDipBall: boolean = true;
+    
 
     public onSelectionChange: Signal<(balls: number[]) => void> = new Signal();
 
@@ -32,17 +29,17 @@ export class LotteryBalls {
         this.app = app;
 
         this.parent = new Container();
-        this.parent.x = (this.app.view.width / 2) - (LotteryBalls.parentWidth / 2);
+        this.parent.x = (this.app.view.width / 2) - (Config.parentWidth / 2);
         this.parent.y = 10;
         this.app.stage.addChild(this.parent);
 
-        this.ballWidth = Math.floor(LotteryBalls.parentWidth / LotteryBalls.columns);
+        this.ballWidth = Math.floor(Config.parentWidth / Config.columns);
 
         this.balls = [];
-        for (let i = 0; i < LotteryBalls.ballCount + ((LotteryBalls.showLuckyDipBall) ? 1 : 0); i++) {
+        for (let i = 0; i < Config.ballCount + ((Config.showLuckyDipBall) ? 1 : 0); i++) {
             const container = new Container();
-            container.x = this.ballWidth * (i % LotteryBalls.columns);
-            container.y = Math.floor(i / LotteryBalls.columns) * this.ballWidth;
+            container.x = this.ballWidth * (i % Config.columns);
+            container.y = Math.floor(i / Config.columns) * this.ballWidth;
             container.eventMode = "static";
             container.hitArea = new Circle(this.ballWidth / 2, this.ballWidth / 2, (this.ballWidth / 2) - 10,);
             container.cursor = "pointer";
@@ -54,7 +51,7 @@ export class LotteryBalls {
             const circle = new Graphics();
             container.addChild(circle);
 
-            const labelText: string = (i < LotteryBalls.ballCount) ? (i + 1).toString() : "LD";
+            const labelText: string = (i < Config.ballCount) ? (i + 1).toString() : "LD";
             const label = new Text(labelText, this.getLabelStyle(0xEEEEEE));
             label.anchor.set(0.5);
             label.x = this.ballWidth / 2;
@@ -67,7 +64,7 @@ export class LotteryBalls {
                 label, 
                 selected: false, 
                 highlighted: false, 
-                value: (i < LotteryBalls.ballCount) ? i + 1 : -1,
+                value: (i < Config.ballCount) ? i + 1 : -1,
                 position: { x: container.x, y: container.y }
             });
             this.updateBall(i);
@@ -75,10 +72,10 @@ export class LotteryBalls {
     }
 
     public selectLuckyDip(): void {
-        const pool: number[] = new Array(LotteryBalls.ballCount).fill(0).map((x, i) => i);
+        const pool: number[] = new Array(Config.ballCount).fill(0).map((x, i) => i);
         this.balls.forEach((x) => x.selected = false);
 
-        for (let i = 0; i < LotteryBalls.maxSelection; i++) {
+        for (let i = 0; i < Config.maxSelection; i++) {
             const random = RNG.getRandomInt(pool.length);
             const value = pool[random];
             pool.splice(random, 1);
@@ -94,10 +91,10 @@ export class LotteryBalls {
     }
 
     public chooseRandomBalls(): number[] {
-        const pool: number[] = new Array(LotteryBalls.ballCount).fill(0).map((x, i) => i + 1);
+        const pool: number[] = new Array(Config.ballCount).fill(0).map((x, i) => i + 1);
         const balls: number[] = [];
 
-        for (let i = 0; i < LotteryBalls.maxSelection; i++) {
+        for (let i = 0; i < Config.maxSelection; i++) {
             const random = RNG.getRandomInt(pool.length);
             balls.push(...pool.splice(random, 1));
         }
@@ -135,7 +132,7 @@ export class LotteryBalls {
     }
 
     private onPointerUp(index: number): void {
-        if (index === LotteryBalls.ballCount) {
+        if (index === Config.ballCount) {
             // LD ball
             const pool: number[] = this.balls.filter((x) => !x.selected && x.value !== -1).map((x) => x.value - 1);
             index = pool[RNG.getRandomInt(pool.length)];
@@ -161,7 +158,7 @@ export class LotteryBalls {
 
     private updateInteractiveState(): void {
         const selectedBalls = this.getCurrentSelected();
-        if (selectedBalls.length >= LotteryBalls.maxSelection) {
+        if (selectedBalls.length >= Config.maxSelection) {
             this.balls.forEach((x, i) => {
                 x.container.eventMode = (x.selected) ? "static": "none";
                 x.highlighted = false;

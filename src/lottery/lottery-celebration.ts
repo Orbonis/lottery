@@ -1,5 +1,6 @@
 import { Application, Container, Graphics, Text } from "pixi.js";
-import { Ball, LotteryBalls } from "./lottery-balls";
+import { Ball } from "./lottery-balls";
+import { config as Config } from "./lottery-config";
 
 export class LotteryCelebration {
     protected parent: Container;
@@ -19,9 +20,9 @@ export class LotteryCelebration {
         this.parent.addChild(this.winLabel);
 
         this.balls = [];
-        for (let i = 0; i < LotteryBalls.maxSelection; i++) {
+        for (let i = 0; i < Config.maxSelection; i++) {
             const container = new Container();
-            container.x = (i * 100) - ((LotteryBalls.maxSelection / 2) * 100);
+            container.x = (i * 100) - ((Config.maxSelection / 2) * 100);
             container.y = 0;
             container.visible = false;
             this.parent.addChild(container);

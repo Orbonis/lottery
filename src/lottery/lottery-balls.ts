@@ -16,6 +16,7 @@ export class LotteryBalls {
     public static readonly parentWidth: number = 1000;
     public static readonly columns: number = 10;
     public static readonly maxSelection: number = 6;
+    public static readonly showLuckyDipBall: boolean = true;
 
     public onSelectionChange: Signal<(balls: number[]) => void> = new Signal();
 
@@ -37,7 +38,7 @@ export class LotteryBalls {
         this.ballWidth = Math.floor(LotteryBalls.parentWidth / LotteryBalls.columns);
 
         this.balls = [];
-        for (let i = 0; i < LotteryBalls.ballCount + 1; i++) {
+        for (let i = 0; i < LotteryBalls.ballCount + ((LotteryBalls.showLuckyDipBall) ? 1 : 0); i++) {
             const container = new Container();
             container.x = this.ballWidth * (i % LotteryBalls.columns);
             container.y = Math.floor(i / LotteryBalls.columns) * this.ballWidth;

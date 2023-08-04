@@ -29,17 +29,17 @@ export class LotteryBalls {
         this.app = app;
 
         this.parent = new Container();
-        this.parent.x = (this.app.view.width / 2) - (Config.parentWidth / 2);
+        this.parent.x = (this.app.view.width / 2) - (Config.ballsContainerWidth / 2);
         this.parent.y = 10;
         this.app.stage.addChild(this.parent);
 
-        this.ballWidth = Math.floor(Config.parentWidth / Config.columns);
+        this.ballWidth = Math.floor(Config.ballsContainerWidth / Config.ballsColumns);
 
         this.balls = [];
         for (let i = 0; i < Config.ballCount + ((Config.showLuckyDipBall) ? 1 : 0); i++) {
             const container = new Container();
-            container.x = this.ballWidth * (i % Config.columns);
-            container.y = Math.floor(i / Config.columns) * this.ballWidth;
+            container.x = this.ballWidth * (i % Config.ballsColumns);
+            container.y = Math.floor(i / Config.ballsColumns) * this.ballWidth;
             container.eventMode = "static";
             container.hitArea = new Circle(this.ballWidth / 2, this.ballWidth / 2, (this.ballWidth / 2) - 10,);
             container.cursor = "pointer";

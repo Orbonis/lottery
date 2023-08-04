@@ -135,7 +135,7 @@ export class LotteryGame {
     }
 
     private resetGame(): void {
-        if (Config.keepPreviousSelection) {
+        if (Config.keepPreviousBallSelection) {
             this.lotteryBalls?.enableInteraction();
         } else {
             this.lotteryBalls?.clearSelection();

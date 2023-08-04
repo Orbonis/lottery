@@ -1,10 +1,10 @@
 export interface LotteryConfiguration {
     ballCount: number;
-    parentWidth: number;
-    columns: number;
+    ballsContainerWidth: number;
+    ballsColumns: number;
     maxSelection: number;
     showLuckyDipBall: boolean;
-    keepPreviousSelection: boolean;
+    keepPreviousBallSelection: boolean;
     startingCredits: number;
     costPerPlay: number;
     winConfiguration: { [ key: number]: number };
@@ -12,11 +12,11 @@ export interface LotteryConfiguration {
 
 export const config: LotteryConfiguration = {
     ballCount: 59,
-    parentWidth: 1000,
-    columns: 10,
+    ballsContainerWidth: 1000,
+    ballsColumns: 10,
     maxSelection: 6,
     showLuckyDipBall: true,
-    keepPreviousSelection: true,
+    keepPreviousBallSelection: true,
     startingCredits: 0,
     costPerPlay: 0,
     winConfiguration: {

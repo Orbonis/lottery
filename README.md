@@ -11,6 +11,10 @@ You can also run a production build with the following command:
 ```
 npm run build
 ```
+>Note:  
+>This is built using Node v20.5.0 
+>You may encounter issues building webpack with older versions of node. 
+>If you encounter errors I recommend using [Node Version Manager](https://github.com/nvm-sh/nvm) to quickly switch between versions without breaking any existing environment.
 
 ### Release Version
 Latest build hosted here:  
